@@ -3,6 +3,7 @@ import { Button, buttonVariants } from './ui/button';
 import Link from 'next/link';
 import { ArrowRightIcon, ShoppingCart } from 'lucide-react';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
+import Cart from './Cart';
 
 const Navbar = async () => {
 	const { getUser } = getKindeServerSession();
@@ -51,12 +52,7 @@ const Navbar = async () => {
 						)}
 						<div className='h-8 w-px bg-zinc-200 hidden sm:block' />
 						{/* Cart */}
-						<Button
-							variant='ghost'
-							size='icon'
-						>
-							<ShoppingCart className='w-4 h-4' />
-						</Button>
+						<Cart />
 					</div>
 				</div>
 			</div>
