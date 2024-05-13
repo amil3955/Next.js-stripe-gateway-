@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useTransition } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
 	Sheet,
@@ -13,8 +13,14 @@ import { Button, buttonVariants } from './ui/button';
 import { ShoppingCart } from 'lucide-react';
 import CartProduct from './CartProduct';
 import { ProductStorage } from './CardProduct';
+import { useRouter } from 'next/navigation';
+import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs';
+import { createCheckoutSession } from '@/actions/cart.action';
 
 const Cart = () => {
+	const { user } = useKindeBrowserClient();
+	const router = useRouter();
+	const [isPending, startTransition] = useTransition();
 	const [cart, setCart] = useState<string | null>(null);
 	const [triggerUseEffect, setTriggerUseEffect] = useState<string | null>(null);
 	const products: ProductStorage[] = JSON.parse(cart || '[]');
@@ -25,6 +31,21 @@ const Cart = () => {
 	}, [triggerUseEffect]);
 
 	const totalPrice = products.reduce((total, curr) => total + curr.amount, 0);
+
+	const handleCheckout = () => {
+		console.info(user);
+		if (!user) {
+			router.push('/api/auth/login?post_login_redirect_url=/');
+		} else {
+			// TODO: implement
+			startTransition(async () => {
+				const res = await createCheckoutSession(products);
+				if (res?.url) {
+					router.push(res.url);
+				}
+			});
+		}
+	};
 
 	return (
 		<Sheet>
@@ -76,7 +97,14 @@ const Cart = () => {
 				{products.length ? (
 					<div className='flex items-end px-4 h-[100px]'>
 						{/* HANDLE CHECKOUT */}
-						<Button className='bg-zinc-900 hover:bg-zinc-900/90 rounded-none w-full py-7 flex items-center space-x-2 font-normal'>
+						<Button
+							disabled={isPending}
+							isLoading={isPending}
+							loadingText='Processing'
+							type='button'
+							onClick={handleCheckout}
+							className='bg-zinc-900 hover:bg-zinc-900/90 rounded-none w-full py-7 flex items-center space-x-2 font-normal'
+						>
 							<span>CHECKOUT</span>
 							<div className='w-[8px] h-px bg-white' />
 							<span>${totalPrice}</span>
