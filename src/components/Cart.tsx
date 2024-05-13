@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
 	Sheet,
@@ -12,10 +12,19 @@ import {
 import { Button, buttonVariants } from './ui/button';
 import { ShoppingCart } from 'lucide-react';
 import CartProduct from './CartProduct';
-import { Product } from '@/app/page';
+import { ProductStorage } from './CardProduct';
 
 const Cart = () => {
-	const products: Product[] = JSON.parse(localStorage.getItem('cart')!) || [];
+	const [cart, setCart] = useState<string | null>(null);
+	const [triggerUseEffect, setTriggerUseEffect] = useState<string | null>(null);
+	const products: ProductStorage[] = JSON.parse(cart || '[]');
+
+	useEffect(() => {
+		let cartStorage = localStorage.getItem('cart');
+		setCart(cartStorage);
+	}, [triggerUseEffect]);
+
+	const totalPrice = products.reduce((total, curr) => total + curr.amount, 0);
 
 	return (
 		<Sheet>
@@ -52,7 +61,15 @@ const Cart = () => {
 					</div>
 				) : (
 					<ScrollArea className='mx-1 px-3 h-full'>
-						<div className='flex flex-col space-y-8'></div>
+						<div className='flex flex-col space-y-8'>
+							{products.map((currentProduct) => (
+								<CartProduct
+									key={currentProduct.product.id}
+									currentProduct={currentProduct}
+									setTriggerUseEffect={setTriggerUseEffect}
+								/>
+							))}
+						</div>
 					</ScrollArea>
 				)}
 				{/* FOOTER */}
@@ -62,7 +79,7 @@ const Cart = () => {
 						<Button className='bg-zinc-900 hover:bg-zinc-900/90 rounded-none w-full py-7 flex items-center space-x-2 font-normal'>
 							<span>CHECKOUT</span>
 							<div className='w-[8px] h-px bg-white' />
-							<span>$22</span>
+							<span>${totalPrice}</span>
 						</Button>
 					</div>
 				) : null}

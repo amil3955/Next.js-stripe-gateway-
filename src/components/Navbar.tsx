@@ -1,7 +1,7 @@
 import React from 'react';
-import { Button, buttonVariants } from './ui/button';
+import { buttonVariants } from './ui/button';
 import Link from 'next/link';
-import { ArrowRightIcon, ShoppingCart } from 'lucide-react';
+import { ArrowRightIcon } from 'lucide-react';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import Cart from './Cart';
 

@@ -1,44 +1,98 @@
 import { X } from 'lucide-react';
 import React, { useState } from 'react';
 import { Button } from './ui/button';
+import { ProductStorage } from './CardProduct';
+import { useRouter } from 'next/navigation';
 
-const CartProduct = () => {
-	const [count, setCount] = useState<number>(1);
+const CartProduct = ({
+	currentProduct,
+	setTriggerUseEffect,
+}: {
+	currentProduct: ProductStorage;
+	setTriggerUseEffect: React.Dispatch<React.SetStateAction<string | null>>;
+}) => {
+	const router = useRouter();
+	const [count, setCount] = useState<number>(currentProduct.total);
 
 	const handleCount = (type: 'increment' | 'decrement') => {
-		if (type === 'increment') {
-			setCount((prev) => prev + 1);
-		}
+		try {
+			const cart = localStorage.getItem('cart');
 
-		if (type === 'decrement') {
-			if (count > 1) {
-				setCount((prev) => prev - 1);
+			if (cart) {
+				const parsedCart: ProductStorage[] = JSON.parse(cart);
+
+				if (type === 'increment') {
+					setCount((prev) => prev + 1);
+					parsedCart.map((value) => {
+						if (value.product.id === currentProduct.product.id) {
+							value.total += 1;
+							value.amount += currentProduct.product.price;
+						}
+						return value;
+					});
+				} else if (type === 'decrement') {
+					if (count > 1) {
+						setCount((prev) => prev - 1);
+						parsedCart.map((value) => {
+							if (value.product.id === currentProduct.product.id) {
+								value.total -= 1;
+								value.amount -= currentProduct.product.price;
+							}
+							return value;
+						});
+					}
+				}
+
+				localStorage.setItem('cart', JSON.stringify(parsedCart));
 			}
+		} finally {
+			router.refresh();
+
+			const randomNumberString = String(Math.floor(Math.random() * 10000));
+			setTriggerUseEffect(randomNumberString);
 		}
 	};
 
 	const handleDelete = () => {
-		console.info('product deleted');
+		try {
+			const cart = localStorage.getItem('cart');
+
+			if (cart) {
+				const parsedCart: ProductStorage[] = JSON.parse(cart);
+				const newCart = parsedCart.filter(
+					(value) => value.product.id !== currentProduct.product.id
+				);
+				localStorage.setItem('cart', JSON.stringify(newCart));
+			}
+		} finally {
+			router.refresh();
+
+			const randomNumberString = String(Math.floor(Math.random() * 10000));
+			setTriggerUseEffect(randomNumberString);
+		}
 	};
 
 	return (
 		<div className='flex flex-row items-start w-full space-x-5 border-b border-b-zinc-200 pb-8 relative'>
-			<img
-				src='https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg'
-				alt='product img'
-				width={350}
-				height={350}
-				className='object-cover w-[80px] h-[80px] mix-blend-multiply'
-			/>
+			<div className='w-[100px]'>
+				<img
+					src={currentProduct.product.image}
+					alt='product img'
+					className='object-cover w-[100px] h-[80px] mix-blend-multiply'
+				/>
+			</div>
 			<div className='flex flex-col justify-between items-start w-full space-y-6 mt-3'>
 				<div className='flex justify-between w-full space-x-8'>
-					<h4 className='text-sm font-normal text-zinc-900'>Title</h4>
+					<h4 className='text-sm font-normal text-zinc-900 max-w-[200px]'>
+						{currentProduct.product.title}
+					</h4>
 				</div>
 				<div className='flex justify-between items-center space-x-8 w-full'>
 					<div className='flex space-x-4 border border-zinc-200 py-0.5 px-2 font-light text-zinc-900'>
 						<button
 							onClick={() => handleCount('decrement')}
 							type='button'
+							className='outline-none border-none'
 						>
 							-
 						</button>
@@ -46,11 +100,12 @@ const CartProduct = () => {
 						<button
 							onClick={() => handleCount('increment')}
 							type='button'
+							className='outline-none border-none'
 						>
 							+
 						</button>
 					</div>
-					<p className='font-light text-zinc-900'>$22</p>
+					<p className='font-light text-zinc-900'>${currentProduct.amount}</p>
 				</div>
 			</div>
 
