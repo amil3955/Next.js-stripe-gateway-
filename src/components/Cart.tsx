@@ -16,13 +16,14 @@ import { ProductStorage } from './CardProduct';
 import { useRouter } from 'next/navigation';
 import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs';
 import { createCheckoutSession } from '@/actions/cart.action';
+import useTriggerUseEffect from '@/hooks/useTriggerUseEffect';
 
 const Cart = () => {
 	const { user } = useKindeBrowserClient();
 	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
 	const [cart, setCart] = useState<string | null>(null);
-	const [triggerUseEffect, setTriggerUseEffect] = useState<string | null>(null);
+	const { triggerUseEffect, setTriggerUseEffect } = useTriggerUseEffect();
 	const products: ProductStorage[] = JSON.parse(cart || '[]');
 
 	useEffect(() => {
@@ -87,7 +88,6 @@ const Cart = () => {
 								<CartProduct
 									key={currentProduct.product.id}
 									currentProduct={currentProduct}
-									setTriggerUseEffect={setTriggerUseEffect}
 								/>
 							))}
 						</div>

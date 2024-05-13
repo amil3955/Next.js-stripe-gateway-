@@ -21,23 +21,15 @@ const Navbar = async () => {
 					</Link>
 					<div className='flex flex-row items-center space-x-4'>
 						{user ? (
-							<>
-								<Link
-									href='/history'
-									className={buttonVariants({ size: 'sm', variant: 'ghost' })}
-								>
-									History
-								</Link>
-								<Link
-									className={buttonVariants({
-										size: 'sm',
-										variant: 'ghost',
-									})}
-									href='/api/auth/logout'
-								>
-									Sign out
-								</Link>
-							</>
+							<Link
+								className={buttonVariants({
+									size: 'sm',
+									variant: 'ghost',
+								})}
+								href='/api/auth/logout'
+							>
+								Sign out
+							</Link>
 						) : (
 							<Link
 								className={buttonVariants({

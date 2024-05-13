@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useTransition } from 'react';
 import {
 	Card,
 	CardContent,
@@ -10,6 +10,7 @@ import {
 import type { Product } from '@/app/page';
 import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
+import useTriggerUseEffect from '@/hooks/useTriggerUseEffect';
 
 export interface ProductStorage {
 	product: Product;
@@ -19,6 +20,8 @@ export interface ProductStorage {
 
 const CardProduct = ({ product }: { product: Product }) => {
 	const router = useRouter();
+	const { setTriggerUseEffect } = useTriggerUseEffect();
+	const [isPending, startTransition] = useTransition();
 
 	const addItemToStorage = () => {
 		try {
@@ -32,32 +35,38 @@ const CardProduct = ({ product }: { product: Product }) => {
 				total: 1,
 			};
 
-			const cart = localStorage.getItem('cart');
-			if (cart) {
-				const parsedCart: ProductStorage[] = JSON.parse(cart);
-				const existingProduct = parsedCart.find((value) => {
-					return value.product.id === newProduct.product.id;
-				});
+			startTransition(() => {
+				const cart = localStorage.getItem('cart');
 
-				if (existingProduct) {
-					parsedCart.map((value) => {
-						if (value.product.id === newProduct.product.id) {
-							value.amount += newProduct.product.price;
-							value.total += 1;
-						}
-
-						return value;
+				if (cart) {
+					const parsedCart: ProductStorage[] = JSON.parse(cart);
+					const existingProduct = parsedCart.find((value) => {
+						return value.product.id === newProduct.product.id;
 					});
-					localStorage.setItem('cart', JSON.stringify(parsedCart));
+
+					if (existingProduct) {
+						parsedCart.map((value) => {
+							if (value.product.id === newProduct.product.id) {
+								value.amount += newProduct.product.price;
+								value.total += 1;
+							}
+
+							return value;
+						});
+						localStorage.setItem('cart', JSON.stringify(parsedCart));
+					} else {
+						parsedCart.push(newProduct);
+						localStorage.setItem('cart', JSON.stringify(parsedCart));
+					}
 				} else {
-					parsedCart.push(newProduct);
-					localStorage.setItem('cart', JSON.stringify(parsedCart));
+					localStorage.setItem('cart', JSON.stringify([newProduct]));
 				}
-			} else {
-				localStorage.setItem('cart', JSON.stringify([newProduct]));
-			}
+			});
 		} finally {
 			router.refresh();
+
+			const randomNumberString = String(Math.floor(Math.random() * 10000));
+			setTriggerUseEffect(randomNumberString);
 		}
 	};
 
@@ -76,6 +85,9 @@ const CardProduct = ({ product }: { product: Product }) => {
 					<div className='hidden group-hover:block transition duration-200 absolute bottom-6 left-6 right-6'>
 						{/* TODO: add to cart */}
 						<Button
+							disabled={isPending}
+							isLoading={isPending}
+							loadingText='Adding to cart'
 							onClick={addItemToStorage}
 							className='w-full rounded-none bg-zinc-900 hover:bg-zinc-900/90'
 						>

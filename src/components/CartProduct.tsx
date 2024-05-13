@@ -3,16 +3,16 @@ import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { ProductStorage } from './CardProduct';
 import { useRouter } from 'next/navigation';
+import useTriggerUseEffect from '@/hooks/useTriggerUseEffect';
 
 const CartProduct = ({
 	currentProduct,
-	setTriggerUseEffect,
 }: {
 	currentProduct: ProductStorage;
-	setTriggerUseEffect: React.Dispatch<React.SetStateAction<string | null>>;
 }) => {
 	const router = useRouter();
 	const [count, setCount] = useState<number>(currentProduct.total);
+	const { setTriggerUseEffect } = useTriggerUseEffect();
 
 	const handleCount = (type: 'increment' | 'decrement') => {
 		try {
