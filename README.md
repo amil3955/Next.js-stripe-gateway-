@@ -10,8 +10,7 @@ A simple ecommerce website, using the API from fakestoreapi
 
 ## Cloning the repository
 ```
-git clone https://github.com/weiwei2694/nextjs14-stripe-payment-gateway.git
-cd nextjs14-stripe-payment-gateway
+git clone https://github.com/amil3955/Next.js-stripe-gateway-.git
 ```
 
 ## Install packages
